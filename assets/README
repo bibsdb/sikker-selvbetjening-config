@@ -1,0 +1,4 @@
+# Place wallpaper image files here.
+# Expected files referenced by group_vars:
+#   wallpaper-1.jpg  (used by group: wallpaper_1)
+#   wallpaper-2.jpg  (used by group: wallpaper_2)

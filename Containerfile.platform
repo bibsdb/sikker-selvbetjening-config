@@ -1,0 +1,7 @@
+FROM quay.io/fedora-ostree-desktops/silverblue:42
+
+RUN dnf -y install cups NetworkManager && dnf clean all
+
+COPY platform/usr/ /usr/
+
+LABEL containers.bootc=1

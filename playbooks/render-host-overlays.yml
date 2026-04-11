@@ -1,0 +1,49 @@
+- name: Render config overlays per host
+  hosts: all
+  gather_facts: false
+
+  tasks:
+    - name: Create host usr tree
+      file:
+        path: "build/{{ inventory_hostname }}/usr/share/myfleet"
+        state: directory
+        recurse: true
+      delegate_to: localhost
+
+    - name: Create NetworkManager directory
+      file:
+        path: "build/{{ inventory_hostname }}/usr/etc/NetworkManager/system-connections"
+        state: directory
+        recurse: true
+      delegate_to: localhost
+
+    - name: Create wallpaper backgrounds directory
+      file:
+        path: "build/{{ inventory_hostname }}/usr/share/backgrounds"
+        state: directory
+        recurse: true
+      delegate_to: localhost
+
+    - name: Render printer config
+      template:
+        src: templates/printer.conf.j2
+        dest: "build/{{ inventory_hostname }}/usr/share/myfleet/printer.conf"
+      delegate_to: localhost
+
+    - name: Render wallpaper config
+      template:
+        src: templates/wallpaper.conf.j2
+        dest: "build/{{ inventory_hostname }}/usr/share/myfleet/wallpaper.conf"
+      delegate_to: localhost
+
+    - name: Render wifi config
+      template:
+        src: templates/wifi.nmconnection.j2
+        dest: "build/{{ inventory_hostname }}/usr/etc/NetworkManager/system-connections/wifi.nmconnection"
+      delegate_to: localhost
+
+    - name: Copy wallpaper asset
+      copy:
+        src: "assets/{{ wallpaper_file }}"
+        dest: "build/{{ inventory_hostname }}/usr/share/backgrounds/{{ wallpaper_file }}"
+      delegate_to: localhost

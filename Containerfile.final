@@ -1,0 +1,2 @@
+FROM registry.example.com/kiosk/platform:42
+COPY --from=registry.example.com/configs/acme-pc01:latest /usr/ /usr/

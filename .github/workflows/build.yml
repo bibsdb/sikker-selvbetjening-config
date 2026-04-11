@@ -1,0 +1,25 @@
+name: Build host config images
+
+on:
+  push:
+    paths:
+      - inventory/**
+      - group_vars/**
+      - templates/**
+      - assets/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host: [pc01, pc02, pc03, pc04]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install ansible
+        run: pip install ansible
+
+      - name: Render and build
+        run: ./scripts/build-host-image.sh ${{ matrix.host }}
