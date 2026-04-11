@@ -2,14 +2,15 @@
 set -euo pipefail
 
 HOST="$1"
+IMAGE_REPO="ghcr.io/bibsdb/sikker-selvbetjening-config-image"
 
 ansible-playbook -i inventory/hosts.yml playbooks/render-host-overlays.yml --limit "$HOST"
 
 podman build \
-  -t registry.example.com/configs/${HOST}:latest \
+  -t ${IMAGE_REPO}/${HOST}:latest \
   -f - . <<EOF
 FROM scratch
 COPY build/${HOST}/usr/ /usr/
 EOF
 
-podman push registry.example.com/configs/${HOST}:latest
+podman push ${IMAGE_REPO}/${HOST}:latest
