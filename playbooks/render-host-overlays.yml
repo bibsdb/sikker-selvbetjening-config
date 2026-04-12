@@ -15,29 +15,33 @@
       include_vars:
         file: "../group_vars/{{ target_group }}.yml"
 
+    - name: Set build root path
+      set_fact:
+        build_root: "{{ playbook_dir }}/../build/{{ build_name }}"
+
   tasks:
     - name: Create build usr tree
       file:
-        path: "build/{{ build_name }}/usr/share/sikker-selvbetjening"
+        path: "{{ build_root }}/usr/share/sikker-selvbetjening"
         state: directory
         recurse: true
 
     - name: Create NetworkManager directory
       file:
-        path: "build/{{ build_name }}/usr/etc/NetworkManager/system-connections"
+        path: "{{ build_root }}/usr/etc/NetworkManager/system-connections"
         state: directory
         recurse: true
 
     - name: Create wallpaper backgrounds directory
       file:
-        path: "build/{{ build_name }}/usr/share/backgrounds"
+        path: "{{ build_root }}/usr/share/backgrounds"
         state: directory
         recurse: true
 
     - name: Render printer config
       template:
         src: "{{ playbook_dir }}/../templates/printer.conf.j2"
-        dest: "build/{{ build_name }}/usr/share/sikker-selvbetjening/printer.conf"
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/printer.conf"
       when:
         - printer_name is defined
         - printer_ip is defined
@@ -45,16 +49,16 @@
     - name: Render wallpaper config
       template:
         src: "{{ playbook_dir }}/../templates/wallpaper.conf.j2"
-        dest: "build/{{ build_name }}/usr/share/sikker-selvbetjening/wallpaper.conf"
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/wallpaper.conf"
       when: wallpaper_file is defined
 
     - name: Render wifi config
       template:
         src: "{{ playbook_dir }}/../templates/wifi.nmconnection.j2"
-        dest: "build/{{ build_name }}/usr/etc/NetworkManager/system-connections/wifi.nmconnection"
+        dest: "{{ build_root }}/usr/etc/NetworkManager/system-connections/wifi.nmconnection"
 
     - name: Copy wallpaper asset
       copy:
         src: "{{ playbook_dir }}/../assets/{{ wallpaper_file }}"
-        dest: "build/{{ build_name }}/usr/share/backgrounds/{{ wallpaper_file }}"
+        dest: "{{ build_root }}/usr/share/backgrounds/{{ wallpaper_file }}"
       when: wallpaper_file is defined
