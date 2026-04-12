@@ -2,11 +2,6 @@ name: Build group config images
 
 on:
   push:
-    paths:
-      - inventory/**
-      - group_vars/**
-      - templates/**
-      - assets/**
 
 permissions:
   contents: read
