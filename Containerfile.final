@@ -1,2 +1,0 @@
-FROM ghcr.io/bibsdb/sikker-selvbetjening-config-image/platform:42
-COPY --from=ghcr.io/bibsdb/sikker-selvbetjening-config-image/acme-pc01:latest /usr/ /usr/

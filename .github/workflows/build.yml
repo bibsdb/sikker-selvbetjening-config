@@ -1,4 +1,4 @@
-name: Build host config images
+name: Build group config images
 
 on:
   push:
@@ -13,11 +13,71 @@ permissions:
   packages: write
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.discover.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install YAML parser
+        run: pip install pyyaml
+
+      - name: Discover build targets
+        id: discover
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from pathlib import Path
+          import yaml
+
+          build_targets = yaml.safe_load(Path("inventory/build_targets.yml").read_text()) or {}
+          targets = build_targets.get("targets", [])
+
+          if not isinstance(targets, list):
+            raise SystemExit("inventory/build_targets.yml must define a list under 'targets'")
+
+          entries = []
+          seen_image_names = set()
+          seen_groups = set()
+
+          for item in targets:
+            if not isinstance(item, dict):
+              raise SystemExit("Each target in inventory/build_targets.yml must be a mapping")
+
+            group_name = item.get("group")
+            image_name = item.get("image_name")
+
+            if not group_name:
+              raise SystemExit("Each target must define 'group'")
+
+            if not image_name:
+              raise SystemExit(f"Target '{group_name}' is missing 'image_name'")
+
+            if group_name in seen_groups:
+              raise SystemExit(f"Duplicate group '{group_name}' in inventory/build_targets.yml")
+            seen_groups.add(group_name)
+
+            if image_name in seen_image_names:
+              raise SystemExit(f"Duplicate image_name '{image_name}'")
+            seen_image_names.add(image_name)
+
+            if not Path(f"group_vars/{group_name}.yml").exists():
+              raise SystemExit(f"Missing group_vars/{group_name}.yml for target '{group_name}'")
+
+            entries.append({"group": group_name, "image": image_name})
+
+          if not entries:
+            raise SystemExit("No build targets found in inventory/build_targets.yml")
+
+          print(f"matrix={json.dumps({'include': entries})}")
+          PY
+
   build:
+    needs: prepare
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        host: [pc01, pc02, pc03, pc04]
+      matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
 
     steps:
       - uses: actions/checkout@v4
@@ -29,4 +89,4 @@ jobs:
         run: pip install ansible
 
       - name: Render and build
-        run: ./scripts/build-host-image.sh ${{ matrix.host }}
+        run: ./scripts/build-group-image.sh "${{ matrix.group }}" "${{ matrix.image }}"

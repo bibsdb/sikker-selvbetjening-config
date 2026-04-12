@@ -1,0 +1,5 @@
+printer_name: office
+printer_ip: 10.1.1.10
+wallpaper_file: bg-green.jpg
+wifi_ssid: GUEST
+wifi_psk: guest-secret

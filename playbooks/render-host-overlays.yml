@@ -1,49 +1,60 @@
-- name: Render config overlays per host
-  hosts: all
+- name: Render config overlay per build target
+  hosts: localhost
+  connection: local
   gather_facts: false
 
+  pre_tasks:
+    - name: Validate target_group input
+      assert:
+        that:
+          - target_group is defined
+          - target_group | length > 0
+        fail_msg: "target_group must be provided"
+
+    - name: Load group vars for target
+      include_vars:
+        file: "../group_vars/{{ target_group }}.yml"
+
   tasks:
-    - name: Create host usr tree
+    - name: Create build usr tree
       file:
-        path: "build/{{ inventory_hostname }}/usr/share/myfleet"
+        path: "build/{{ build_name }}/usr/share/sikker-selvbetjening"
         state: directory
         recurse: true
-      delegate_to: localhost
 
     - name: Create NetworkManager directory
       file:
-        path: "build/{{ inventory_hostname }}/usr/etc/NetworkManager/system-connections"
+        path: "build/{{ build_name }}/usr/etc/NetworkManager/system-connections"
         state: directory
         recurse: true
-      delegate_to: localhost
 
     - name: Create wallpaper backgrounds directory
       file:
-        path: "build/{{ inventory_hostname }}/usr/share/backgrounds"
+        path: "build/{{ build_name }}/usr/share/backgrounds"
         state: directory
         recurse: true
-      delegate_to: localhost
 
     - name: Render printer config
       template:
         src: templates/printer.conf.j2
-        dest: "build/{{ inventory_hostname }}/usr/share/myfleet/printer.conf"
-      delegate_to: localhost
+        dest: "build/{{ build_name }}/usr/share/sikker-selvbetjening/printer.conf"
+      when:
+        - printer_name is defined
+        - printer_ip is defined
 
     - name: Render wallpaper config
       template:
         src: templates/wallpaper.conf.j2
-        dest: "build/{{ inventory_hostname }}/usr/share/myfleet/wallpaper.conf"
-      delegate_to: localhost
+        dest: "build/{{ build_name }}/usr/share/sikker-selvbetjening/wallpaper.conf"
+      when: wallpaper_file is defined
 
     - name: Render wifi config
       template:
         src: templates/wifi.nmconnection.j2
-        dest: "build/{{ inventory_hostname }}/usr/etc/NetworkManager/system-connections/wifi.nmconnection"
-      delegate_to: localhost
+        dest: "build/{{ build_name }}/usr/etc/NetworkManager/system-connections/wifi.nmconnection"
 
     - name: Copy wallpaper asset
       copy:
         src: "assets/{{ wallpaper_file }}"
-        dest: "build/{{ inventory_hostname }}/usr/share/backgrounds/{{ wallpaper_file }}"
-      delegate_to: localhost
+        dest: "build/{{ build_name }}/usr/share/backgrounds/{{ wallpaper_file }}"
+      when: wallpaper_file is defined

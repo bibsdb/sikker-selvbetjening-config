@@ -1,0 +1,9 @@
+targets:
+  - group: broager
+    image_name: broager
+
+  - group: nordborg
+    image_name: nordborg
+
+  - group: borgerservice
+    image_name: borgerservice
