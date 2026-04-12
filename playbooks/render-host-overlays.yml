@@ -36,7 +36,7 @@
 
     - name: Render printer config
       template:
-        src: templates/printer.conf.j2
+        src: "{{ playbook_dir }}/../templates/printer.conf.j2"
         dest: "build/{{ build_name }}/usr/share/sikker-selvbetjening/printer.conf"
       when:
         - printer_name is defined
@@ -44,17 +44,17 @@
 
     - name: Render wallpaper config
       template:
-        src: templates/wallpaper.conf.j2
+        src: "{{ playbook_dir }}/../templates/wallpaper.conf.j2"
         dest: "build/{{ build_name }}/usr/share/sikker-selvbetjening/wallpaper.conf"
       when: wallpaper_file is defined
 
     - name: Render wifi config
       template:
-        src: templates/wifi.nmconnection.j2
+        src: "{{ playbook_dir }}/../templates/wifi.nmconnection.j2"
         dest: "build/{{ build_name }}/usr/etc/NetworkManager/system-connections/wifi.nmconnection"
 
     - name: Copy wallpaper asset
       copy:
-        src: "assets/{{ wallpaper_file }}"
+        src: "{{ playbook_dir }}/../assets/{{ wallpaper_file }}"
         dest: "build/{{ build_name }}/usr/share/backgrounds/{{ wallpaper_file }}"
       when: wallpaper_file is defined
