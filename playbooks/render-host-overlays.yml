@@ -18,7 +18,18 @@
     - name: Load group vars for target groups in order
       include_vars:
         file: "../group_vars/{{ item }}.yml"
+        name: overlay_group_vars
       loop: "{{ normalized_target_groups }}"
+      register: loaded_group_vars
+
+    - name: Initialize merged overlay sections
+      set_fact:
+        overlay_sections: {}
+
+    - name: Merge overlay sections in group order
+      set_fact:
+        overlay_sections: "{{ overlay_sections | combine(item.ansible_facts.overlay_group_vars, recursive=True) }}"
+      loop: "{{ loaded_group_vars.results }}"
 
     - name: Set build root path
       set_fact:
@@ -31,44 +42,11 @@
         state: directory
         recurse: true
 
-    - name: Create NetworkManager directory
-      file:
-        path: "{{ build_root }}/usr/etc/NetworkManager/system-connections"
-        state: directory
-        recurse: true
-
-    - name: Create wallpaper backgrounds directory
-      file:
-        path: "{{ build_root }}/usr/share/backgrounds"
-        state: directory
-        recurse: true
-
-    - name: Render printer config
+    - name: Render section config files
       template:
-        src: "{{ playbook_dir }}/../templates/printer.conf.j2"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/printer.conf"
-      when:
-        - (printer is defined and printer.name is defined and printer.ip is defined) or (printer_name is defined and printer_ip is defined)
-
-    - name: Validate wifi input
-      assert:
-        that:
-          - (wifi is defined and wifi.ssid is defined and wifi.psk is defined) or (wifi_ssid is defined and wifi_psk is defined)
-        fail_msg: "wifi.ssid and wifi.psk (or legacy wifi_ssid and wifi_psk) must be provided"
-
-    - name: Render wallpaper config
-      template:
-        src: "{{ playbook_dir }}/../templates/wallpaper.conf.j2"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/wallpaper.conf"
-      when: wallpaper_file is defined
-
-    - name: Render wifi config
-      template:
-        src: "{{ playbook_dir }}/../templates/wifi.nmconnection.j2"
-        dest: "{{ build_root }}/usr/etc/NetworkManager/system-connections/wifi.nmconnection"
-
-    - name: Copy wallpaper asset
-      copy:
-        src: "{{ playbook_dir }}/../assets/{{ wallpaper_file }}"
-        dest: "{{ build_root }}/usr/share/backgrounds/{{ wallpaper_file }}"
-      when: wallpaper_file is defined
+        src: "{{ playbook_dir }}/../templates/section.conf.j2"
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item.key }}.conf"
+      loop: "{{ overlay_sections | dict2items }}"
+      vars:
+        section_values: "{{ item.value }}"
+      when: item.value is mapping

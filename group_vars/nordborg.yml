@@ -1,7 +1,6 @@
 printer:
   name: office
   ip: 10.1.1.20
-wallpaper_file: bg-blue.jpg
 wifi:
   ssid: GUEST
   psk: guest-secret
