@@ -12,4 +12,4 @@ bootc_default_version: latest
 bootc_apply: true
 
 # Optional immediate reboot after switching.
-bootc_reboot_after_switch: false
+bootc_reboot_after_switch: true
