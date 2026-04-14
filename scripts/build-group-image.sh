@@ -4,7 +4,7 @@ set -euo pipefail
 GROUP="$1"
 IMAGE_NAME="${2:-$GROUP}"
 IMAGE_REPO="ghcr.io/bibsdb/sikker-selvbetjening-config-image"
-BASE_IMAGE="ghcr.io/bibsdb/borgerpc-ublue"
+BASE_IMAGE="ghcr.io/bibsdb/sikker-selvbetjening"
 DATE_TAG="$(date -u +%Y%m%d)"
 
 if [[ -n "${GITHUB_SHA:-}" ]]; then
