@@ -1,2 +1,3 @@
-wifi_ssid: OFFICE
-wifi_psk: office-secret
+wifi:
+  ssid: OFFICE
+  psk: office-secret

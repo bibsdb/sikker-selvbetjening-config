@@ -1,2 +1,2 @@
-PRINTER_NAME={{ printer_name }}
-PRINTER_IP={{ printer_ip }}
+PRINTER_NAME={{ printer.name | default(printer_name) }}
+PRINTER_IP={{ printer.ip | default(printer_ip) }}

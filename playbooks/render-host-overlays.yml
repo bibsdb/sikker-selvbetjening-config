@@ -48,8 +48,13 @@
         src: "{{ playbook_dir }}/../templates/printer.conf.j2"
         dest: "{{ build_root }}/usr/share/sikker-selvbetjening/printer.conf"
       when:
-        - printer_name is defined
-        - printer_ip is defined
+        - (printer is defined and printer.name is defined and printer.ip is defined) or (printer_name is defined and printer_ip is defined)
+
+    - name: Validate wifi input
+      assert:
+        that:
+          - (wifi is defined and wifi.ssid is defined and wifi.psk is defined) or (wifi_ssid is defined and wifi_psk is defined)
+        fail_msg: "wifi.ssid and wifi.psk (or legacy wifi_ssid and wifi_psk) must be provided"
 
     - name: Render wallpaper config
       template:

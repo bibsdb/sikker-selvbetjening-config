@@ -1,10 +1,10 @@
 [connection]
-id={{ wifi_ssid }}
+id={{ wifi.ssid | default(wifi_ssid) }}
 type=wifi
 
 [wifi]
-ssid={{ wifi_ssid }}
+ssid={{ wifi.ssid | default(wifi_ssid) }}
 
 [wifi-security]
 key-mgmt=wpa-psk
-psk={{ wifi_psk }}
+psk={{ wifi.psk | default(wifi_psk) }}
