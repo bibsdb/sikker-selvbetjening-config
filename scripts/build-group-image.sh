@@ -4,7 +4,7 @@ set -euo pipefail
 TARGET_GROUPS_CSV="$1"
 FIRST_GROUP="${TARGET_GROUPS_CSV%%,*}"
 IMAGE_NAME="${2:-$FIRST_GROUP}"
-IMAGE_REPO="ghcr.io/bibsdb/sikker-selvbetjening-config-image"
+IMAGE_REPO="ghcr.io/bibsdb/sikker-selvbetjening-config"
 BASE_IMAGE="ghcr.io/bibsdb/sikker-selvbetjening"
 DATE_TAG="$(date -u +%Y%m%d)"
 
