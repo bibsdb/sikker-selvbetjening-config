@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-GROUP="$1"
-IMAGE_NAME="${2:-$GROUP}"
+TARGET_GROUPS_CSV="$1"
+FIRST_GROUP="${TARGET_GROUPS_CSV%%,*}"
+IMAGE_NAME="${2:-$FIRST_GROUP}"
 IMAGE_REPO="ghcr.io/bibsdb/sikker-selvbetjening-config-image"
 BASE_IMAGE="ghcr.io/bibsdb/sikker-selvbetjening"
 DATE_TAG="$(date -u +%Y%m%d)"
@@ -26,7 +27,7 @@ if [[ -n "$SHA_TAG" ]]; then
 fi
 
 rm -rf "build/${IMAGE_NAME}"
-ansible-playbook -i localhost, playbooks/render-host-overlays.yml -e "target_group=${GROUP}" -e "build_name=${IMAGE_NAME}"
+ansible-playbook -i localhost, playbooks/render-host-overlays.yml -e "target_groups=${TARGET_GROUPS_CSV}" -e "build_name=${IMAGE_NAME}"
 
 podman build \
   -t ${IMAGE_REPO}/${IMAGE_NAME}:latest \

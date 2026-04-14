@@ -34,33 +34,50 @@ jobs:
 
           entries = []
           seen_image_names = set()
-          seen_groups = set()
 
           for item in targets:
             if not isinstance(item, dict):
               raise SystemExit("Each target in inventory/build_targets.yml must be a mapping")
 
-            group_name = item.get("group")
+            target_name = item.get("name")
+            description = item.get("description")
+            groups = item.get("groups")
             image_name = item.get("image_name")
 
-            if not group_name:
-              raise SystemExit("Each target must define 'group'")
+            if not target_name:
+              raise SystemExit("Each target must define 'name'")
+
+            if not description:
+              raise SystemExit(f"Target '{target_name}' is missing 'description'")
+
+            if not isinstance(groups, list) or not groups:
+              raise SystemExit(f"Target '{target_name}' must define a non-empty 'groups' list")
+
+            if any(not isinstance(group_name, str) or not group_name for group_name in groups):
+              raise SystemExit(f"Target '{target_name}' contains invalid group names")
+
+            if len(set(groups)) != len(groups):
+              raise SystemExit(f"Target '{target_name}' contains duplicate groups")
 
             if not image_name:
-              raise SystemExit(f"Target '{group_name}' is missing 'image_name'")
-
-            if group_name in seen_groups:
-              raise SystemExit(f"Duplicate group '{group_name}' in inventory/build_targets.yml")
-            seen_groups.add(group_name)
+              raise SystemExit(f"Target '{target_name}' is missing 'image_name'")
 
             if image_name in seen_image_names:
               raise SystemExit(f"Duplicate image_name '{image_name}'")
             seen_image_names.add(image_name)
 
-            if not Path(f"group_vars/{group_name}.yml").exists():
-              raise SystemExit(f"Missing group_vars/{group_name}.yml for target '{group_name}'")
+            for group_name in groups:
+              if not Path(f"group_vars/{group_name}.yml").exists():
+                raise SystemExit(f"Missing group_vars/{group_name}.yml for target '{target_name}'")
 
-            entries.append({"group": group_name, "image": image_name})
+            entries.append(
+              {
+                "name": target_name,
+                "description": description,
+                "groups_csv": ",".join(groups),
+                "image": image_name,
+              }
+            )
 
           if not entries:
             raise SystemExit("No build targets found in inventory/build_targets.yml")
@@ -71,6 +88,7 @@ jobs:
   build:
     needs: prepare
     runs-on: ubuntu-latest
+    name: Build ${{ matrix.name }}
     strategy:
       matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
 
@@ -84,4 +102,4 @@ jobs:
         run: pip install ansible
 
       - name: Render and build
-        run: ./scripts/build-group-image.sh "${{ matrix.group }}" "${{ matrix.image }}"
+        run: ./scripts/build-group-image.sh "${{ matrix.groups_csv }}" "${{ matrix.image }}"

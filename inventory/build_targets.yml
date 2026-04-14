@@ -1,9 +1,13 @@
 targets:
-  - group: broager
+  - name: Broager
+    description: Build image for Broager locations
+    groups:
+      - broager
     image_name: broager
 
-  - group: nordborg
+  - name: Nordborg
+    description: Build image for Nordborg and Borgerservice overlays
+    groups:
+      - nordborg
+      - borgerservice
     image_name: nordborg
-
-  - group: borgerservice
-    image_name: borgerservice

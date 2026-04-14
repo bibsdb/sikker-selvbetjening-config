@@ -4,16 +4,21 @@
   gather_facts: false
 
   pre_tasks:
-    - name: Validate target_group input
+    - name: Validate target_groups input
       assert:
         that:
-          - target_group is defined
-          - target_group | length > 0
-        fail_msg: "target_group must be provided"
+          - target_groups is defined
+          - target_groups | length > 0
+        fail_msg: "target_groups must be provided"
 
-    - name: Load group vars for target
+    - name: Normalize target groups list
+      set_fact:
+        normalized_target_groups: "{{ target_groups.split(',') if target_groups is string else target_groups }}"
+
+    - name: Load group vars for target groups in order
       include_vars:
-        file: "../group_vars/{{ target_group }}.yml"
+        file: "../group_vars/{{ item }}.yml"
+      loop: "{{ normalized_target_groups }}"
 
     - name: Set build root path
       set_fact:
