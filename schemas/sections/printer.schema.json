@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "./sections/printer.schema.json",
+  "title": "Printer Section",
+  "description": "Schema for the printer section used in group_vars overlay files.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable printer name shown or used by the target system.",
+      "minLength": 1
+    },
+    "ip": {
+      "type": "string",
+      "description": "IPv4 address of the printer that the client should use.",
+      "format": "ipv4"
+    }
+  },
+  "required": [
+    "name",
+    "ip"
+  ]
+}
