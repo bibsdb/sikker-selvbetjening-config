@@ -32,7 +32,6 @@ theme:
 
 plugins:
   - search
-  - macros
 
 markdown_extensions:
   - pymdownx.superfences
