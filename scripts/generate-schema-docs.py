@@ -84,7 +84,7 @@ def main() -> int:
     repo_root = Path(__file__).resolve().parent.parent
     root_schema = repo_root / "schemas" / "group-vars.schema.json"
     sections_dir = repo_root / "schemas" / "sections"
-    output_dir = repo_root / "site" / "schema"
+    output_dir = repo_root / "site"
     output_dir.mkdir(parents=True, exist_ok=True)
 
     if not root_schema.exists():
