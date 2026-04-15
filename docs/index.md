@@ -1,13 +1,21 @@
-# Configuration Schema Documentation
+# Groups (group_vars)
 
-Welcome to the schema documentation for **sikker-selvbetjening-config**. This site documents the JSON Schema definitions used to validate overlay configuration files across the fleet.
+Groups can be used to create a policy configuration (GPO) for a collection of computers.
 
-## Quick Start
+## How groups work
 
-The configuration overlay system uses a hierarchical schema approach:
+1. **Create a new file** in the `group_vars/` folder. The filename becomes the group's system name — it must not contain spaces or special characters, and must have the `.yml` extension.
+2. **Add the settings** you want to apply to the group. This page provides detailed information about all supported configuration variables and usage examples.
+3. **Commit the file.** An automatic validation process will run to check the file for syntax errors.
+4. **Once validated**, a build process starts on GitHub where the settings are compiled into your images.
+5. **The updated images are rolled out** to the computers, and the new settings take effect.
 
-- **Root Schema** ([`group-vars.schema.json`](schemas/root.md)): Defines the top-level structure with sections
-- **Section Schemas**: Each section (printer, WiFi, etc.) has its own dedicated schema file
+## Examples of use
+For example, groups can be used to:
+
+- Install a printer on all computers at a specific location
+- Change the browser start page for computers at a specific location
+- Customize power on/off schedules to the needs of a specific location
 
 ## Configuration Sections
 
@@ -25,37 +33,3 @@ Wireless network settings including:
 - Hidden network support
 
 [Learn more about Wi-Fi Configuration →](schemas/wifi.md)
-
-## File Locations
-
-All schema files are located in the `schemas/` directory:
-
-```
-schemas/
-├── group-vars.schema.json       # Root schema
-└── sections/
-    ├── printer.schema.json      # Printer configuration schema
-    └── wifi.schema.json         # Wi-Fi configuration schema
-```
-
-## Group Vars Files
-
-Target-specific overlay configurations are defined in `group_vars/`:
-
-```
-group_vars/
-├── borgerservice.yml            # Borgerservice branch configuration
-├── broager.yml                  # Broager branch configuration
-└── nordborg.yml                 # Nordborg branch configuration
-```
-
-## Validation
-
-Configuration files are validated against these schemas during the build process:
-
-1. **JSON Schema validation**: Automatic type checking and constraint enforcement
-2. **Cross-field validation**: Custom constraints (e.g., default printer must exist) are enforced by `scripts/validate-group-vars.py`
-
-## More Information
-
-For details about the overall infrastructure, see the [README](https://github.com/bibsdb/sikker-selvbetjening-config) in the repository.
