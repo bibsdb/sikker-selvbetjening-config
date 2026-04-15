@@ -55,7 +55,7 @@
       }
     },
     {
-      "title": "Legacy Flat Printer Model",
+      "title": "Flat Printer Model",
       "description": "Legacy printer model kept for backward compatibility.",
       "type": "object",
       "additionalProperties": false,
