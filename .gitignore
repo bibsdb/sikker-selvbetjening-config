@@ -1,5 +1,5 @@
-# Generated documentation site
-site/
+# MkDocs generated site
+/site/
 
 # Python
 __pycache__/
@@ -19,14 +19,18 @@ parts/
 sdist/
 var/
 wheels/
+pip-wheel-metadata/
+share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual environments
 venv/
 ENV/
 env/
+.venv
 
 # IDE
 .vscode/
@@ -34,7 +38,8 @@ env/
 *.swp
 *.swo
 *~
+.DS_Store
 
 # OS
-.DS_Store
 Thumbs.db
+
