@@ -1,16 +1,31 @@
 printer:
+  default_printer: konica_minolta_c258
   princh:
-    enable: true
+    xerox-101:
+      display_name: Printer in makerspace
+      id: 854658
   no_ppd:
-    office:
-      name: office
-      ip: 10.1.1.20
-    reception:
-      name: reception
+    ricoh_c3010:
+      display_name: P11567 - Ricoh C3010
+      ip: 10.163.88.27
+      settings:
+        page_size: A4
+        color_mode: rgb
+        duplex: none
+        orientation: portrait
+    konica_minolta_c258:
+      display_name: KONICA MINOLTA C258
       ip: 10.1.1.25
+      protocol: ipp
+      settings:
+        page_size: A4
+        color_mode: rgb
+        duplex: duplex_tumble
+        orientation: landscape
   with_ppd:
     labelprinter:
-      name: labelprinter
+      display_name: Label printer
+      protocol: socket
       ip: 10.1.1.30
       ppd_file: assets/Ricoh-IM_C3010-PDF-Ricoh.ppd
 
