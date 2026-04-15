@@ -2,23 +2,123 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "./sections/printer.schema.json",
   "title": "Printer Section",
-  "description": "Schema for the printer section used in group_vars overlay files.",
-  "type": "object",
-  "additionalProperties": false,
-  "properties": {
-    "name": {
-      "type": "string",
-      "description": "Human-readable printer name shown or used by the target system.",
-      "minLength": 1
+  "description": "Schema for the printer section used in group_vars overlay files. Supports the newer nested model and a legacy flat model during migration.",
+  "oneOf": [
+    {
+      "title": "Nested Printer Model",
+      "description": "Preferred printer model with feature flags and named printer profiles.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "princh": {
+          "type": "object",
+          "description": "Feature flags for printer integration behavior.",
+          "additionalProperties": false,
+          "properties": {
+            "enable": {
+              "type": "boolean",
+              "description": "Enable printer integration for this target."
+            }
+          },
+          "required": [
+            "enable"
+          ]
+        },
+        "no_ppd": {
+          "type": "object",
+          "description": "Collection of printer profiles that do not require a PPD file. Keys are logical printer IDs.",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/printer_profile"
+          }
+        },
+        "with_ppd": {
+          "type": "object",
+          "description": "Collection of printer profiles that require a PPD file. Keys are logical printer IDs.",
+          "minProperties": 1,
+          "additionalProperties": {
+            "$ref": "#/$defs/printer_profile_with_ppd"
+          }
+        }
+      }
     },
-    "ip": {
-      "type": "string",
-      "description": "IPv4 address of the printer that the client should use.",
-      "format": "ipv4"
+    {
+      "title": "Legacy Flat Printer Model",
+      "description": "Legacy printer model kept for backward compatibility.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable printer name shown or used by the target system.",
+          "minLength": 1
+        },
+        "ip": {
+          "type": "string",
+          "description": "IPv4 address of the printer that the client should use.",
+          "format": "ipv4"
+        }
+      },
+      "required": [
+        "name",
+        "ip"
+      ]
     }
-  },
-  "required": [
-    "name",
-    "ip"
-  ]
+  ],
+  "$defs": {
+    "printer_profile": {
+      "type": "object",
+      "description": "Common printer profile object.",
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Human-readable printer name shown or used by the target system.",
+          "minLength": 1
+        },
+        "ip": {
+          "type": "string",
+          "description": "IPv4 address of the printer that the client should use.",
+          "format": "ipv4"
+        }
+      },
+      "required": [
+        "name",
+        "ip"
+      ]
+    },
+    "printer_profile_with_ppd": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/printer_profile"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "Human-readable printer name shown or used by the target system.",
+              "minLength": 1
+            },
+            "ip": {
+              "type": "string",
+              "description": "IPv4 address of the printer that the client should use.",
+              "format": "ipv4"
+            },
+            "ppd_file": {
+              "type": "string",
+              "description": "Path to a PPD file in assets that should be copied into the image.",
+              "pattern": "^assets/.+\\.ppd$"
+            }
+          },
+          "required": [
+            "name",
+            "ip",
+            "ppd_file"
+          ]
+        }
+      ]
+    }
+  }
 }

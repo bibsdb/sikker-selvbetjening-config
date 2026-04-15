@@ -1,6 +1,19 @@
 printer:
-  name: office
-  ip: 10.1.1.20
+  princh:
+    enable: true
+  no_ppd:
+    office:
+      name: office
+      ip: 10.1.1.20
+    reception:
+      name: reception
+      ip: 10.1.1.25
+  with_ppd:
+    labelprinter:
+      name: labelprinter
+      ip: 10.1.1.30
+      ppd_file: assets/Ricoh-IM_C3010-PDF-Ricoh.ppd
+
 wifi:
   ssid: GUEST
   psk: guest-secret

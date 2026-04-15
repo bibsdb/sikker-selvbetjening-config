@@ -35,23 +35,59 @@
       set_fact:
         build_root: "{{ playbook_dir }}/../build/{{ build_name }}"
 
-    - name: Initialize rendered overlay sections
-      set_fact:
-        rendered_overlay_sections: "{{ overlay_sections }}"
+    - name: Normalize overlay data and collect nested _file references
+      shell: |
+        python3 - <<'PY'
+        import json
+        import os
 
-    - name: Build section entries for generic processing
-      set_fact:
-        overlay_section_entries: "{{ (overlay_section_entries | default([])) + [{'section': item.key, 'vars': (item.value | dict2items)}] }}"
-      loop: "{{ overlay_sections | dict2items }}"
-      when: item.value is mapping
+        data = json.loads(os.environ["OVERLAY_JSON"])
+        file_paths = []
 
-    - name: Normalize file variable values to destination-relative paths
+        def normalize(value):
+            if isinstance(value, dict):
+                normalized = {}
+                for key, subvalue in value.items():
+                    normalized_value = normalize(subvalue)
+                    if key.endswith("_file") and isinstance(normalized_value, str):
+                        rel_path = normalized_value[7:] if normalized_value.startswith("assets/") else normalized_value
+                        file_paths.append(rel_path)
+                        normalized[key] = rel_path
+                    else:
+                        normalized[key] = normalized_value
+                return normalized
+
+            if isinstance(value, list):
+                return [normalize(item) for item in value]
+
+            return value
+
+        normalized_overlay = normalize(data)
+
+        print(
+            json.dumps(
+                {
+                    "rendered_overlay_sections": normalized_overlay,
+                    "overlay_file_paths": sorted(set(file_paths)),
+                }
+            )
+        )
+        PY
+      args:
+        executable: /bin/bash
+      environment:
+        OVERLAY_JSON: "{{ overlay_sections | to_json }}"
+      register: overlay_processing
+      changed_when: false
+
+    - name: Parse normalized overlay payload
       set_fact:
-        rendered_overlay_sections: "{{ rendered_overlay_sections | combine({item.0.section: {item.1.key: (item.1.value | regex_replace('^assets/', ''))}}, recursive=True) }}"
-      loop: "{{ query('subelements', overlay_section_entries | default([]), 'vars') }}"
-      when:
-        - item.1.key is regex('_file$')
-        - item.1.value is string
+        overlay_processing_data: "{{ overlay_processing.stdout | from_json }}"
+
+    - name: Set rendered overlay sections
+      set_fact:
+        rendered_overlay_sections: "{{ overlay_processing_data.rendered_overlay_sections }}"
+        overlay_file_paths: "{{ overlay_processing_data.overlay_file_paths }}"
 
   tasks:
     - name: Create build usr tree
@@ -62,23 +98,18 @@
 
     - name: Create directories for file variables
       file:
-        path: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ ((item.1.value | regex_replace('^assets/', '')) | dirname) }}"
+        path: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item | dirname }}"
         state: directory
         recurse: true
-      loop: "{{ query('subelements', overlay_section_entries | default([]), 'vars') }}"
+      loop: "{{ overlay_file_paths | default([]) }}"
       when:
-        - item.1.key is regex('_file$')
-        - item.1.value is string
-        - (item.1.value | regex_replace('^assets/', '')) | dirname != '.'
+        - item | dirname != '.'
 
     - name: Copy files referenced by _file variables from assets
       copy:
-        src: "{{ playbook_dir }}/../assets/{{ item.1.value | regex_replace('^assets/', '') }}"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item.1.value | regex_replace('^assets/', '') }}"
-      loop: "{{ query('subelements', overlay_section_entries | default([]), 'vars') }}"
-      when:
-        - item.1.key is regex('_file$')
-        - item.1.value is string
+        src: "{{ playbook_dir }}/../assets/{{ item }}"
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item }}"
+      loop: "{{ overlay_file_paths | default([]) }}"
 
     - name: Render section config files
       template:

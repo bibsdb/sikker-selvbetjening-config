@@ -1,3 +1,20 @@
-{% for item in section_values | dict2items %}
-{{ item.key }}={% if item.value is boolean %}{{ 'true' if item.value else 'false' }}{% else %}{{ item.value }}{% endif %}
-{% endfor %}
+{% macro scalar_text(value) -%}
+{%- if value is boolean -%}
+{{ 'true' if value else 'false' }}
+{%- else -%}
+{{ value }}
+{%- endif -%}
+{%- endmacro %}
+
+{% macro render_mapping(mapping, prefix='') -%}
+{%- for item in mapping | dict2items | sort(attribute='key') -%}
+{%- set full_key = prefix ~ item.key -%}
+{%- if item.value is mapping -%}
+{{ render_mapping(item.value, full_key ~ '.') }}
+{%- else -%}
+{{ full_key }}={{ scalar_text(item.value) }}
+{% endif -%}
+{%- endfor -%}
+{%- endmacro %}
+
+{{ render_mapping(section_values) }}
