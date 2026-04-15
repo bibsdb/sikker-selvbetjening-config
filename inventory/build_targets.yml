@@ -1,3 +1,4 @@
+targets:
   - name: Nordborg
     description: Build image for Nordborg and Borgerservice overlays
     groups:
