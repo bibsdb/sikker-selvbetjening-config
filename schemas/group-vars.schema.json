@@ -6,6 +6,10 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
+    "desktop": {
+      "$ref": "./sections/desktop.schema.json",
+      "description": "Desktop configuration section. Optional for targets that define desktop customizations."
+    },
     "printer": {
       "$ref": "./sections/printer.schema.json",
       "description": "Printer configuration section. Optional for targets that do not use a printer."

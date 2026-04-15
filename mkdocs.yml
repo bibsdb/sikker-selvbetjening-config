@@ -50,6 +50,7 @@ nav:
   - Home: index.md
   - Schemas:
     - Root Schema (group-vars): schemas/root.md
+    - Desktop Configuration: schemas/desktop.md
     - Printer Configuration: schemas/printer.md
     - WiFi Configuration: schemas/wifi.md
   - About: about.md

@@ -1,0 +1,8 @@
+desktop: 
+  background_image: assets/bg-green.jpg
+  shortcuts_in_menu:
+    - firefox
+    - libreoffice-writer
+
+wifi:
+  ssid: Borgernet
