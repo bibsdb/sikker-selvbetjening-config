@@ -1,4 +1,4 @@
-# Groups (group_vars)
+# Group Configuration (group_vars)
 
 Groups can be used to create a policy configuration (GPO) for a collection of computers.
 
