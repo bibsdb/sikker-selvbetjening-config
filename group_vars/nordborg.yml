@@ -1,3 +1,6 @@
+desktop: 
+  background_image_file: assets/bg-nordborg.jpg
+
 printer:
   default_printer: ricoh_c3010
  

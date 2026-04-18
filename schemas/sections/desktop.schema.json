@@ -6,9 +6,9 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "background_image": {
+    "background_image_file": {
       "type": "string",
-      "description": "Path to the desktop background image asset.",
+      "description": "Path to the desktop background image asset. The _file suffix makes this value a file reference that is copied from assets during overlay rendering.",
       "pattern": "^assets/.+"
     },
     "shortcuts_in_menu": {
