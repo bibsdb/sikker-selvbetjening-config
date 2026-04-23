@@ -111,10 +111,10 @@
         dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item }}"
       loop: "{{ overlay_file_paths | default([]) }}"
 
-    - name: Render section config files
+    - name: Render section config files as YAML
       template:
-        src: "{{ playbook_dir }}/../templates/section.conf.j2"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item.key }}.conf"
+        src: "{{ playbook_dir }}/../templates/section.yml.j2"
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item.key }}.yml"
       loop: "{{ rendered_overlay_sections | dict2items }}"
       vars:
         section_values: "{{ item.value }}"
