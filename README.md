@@ -66,12 +66,6 @@ flowchart TD
   A1 -. validate against .-> V1
   A1 -. validate with .-> V2 --> V3
 
-  subgraph Docs Pipeline [.github/workflows/schema-docs.yml]
-    F1[Build MkDocs site]
-    F2[Publish to GitHub Pages]
-  end
-
-  V1 --> F1 --> F2
 ```
 
 ## Key Paths
@@ -81,4 +75,4 @@ flowchart TD
 - Overlay renderer: `playbooks/render-host-overlays.yml`
 - Build and push script: `scripts/build-group-image.sh`
 - Optional cross-field validator: `scripts/validate-group-vars.py`
-- Schema docs: `docs/`, `schemas/`, `mkdocs.yml`
+- Schema definitions: `schemas/`
