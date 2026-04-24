@@ -17,7 +17,7 @@
 
     - name: Load group vars for target groups in order
       include_vars:
-        file: "../group_vars/{{ item }}.yml"
+        file: "../../config/group_vars/{{ item }}.yml"
         name: overlay_group_vars
       loop: "{{ normalized_target_groups }}"
       register: loaded_group_vars
@@ -35,26 +35,41 @@
       set_fact:
         build_root: "{{ playbook_dir }}/../build/{{ build_name }}"
 
-    - name: Normalize overlay data and collect nested _file references
+    - name: Normalize overlay data and collect typed asset references
       shell: |
         python3 - <<'PY'
         import json
         import os
+        import posixpath
+        import sys
 
         data = json.loads(os.environ["OVERLAY_JSON"])
         file_paths = []
 
         def normalize(value):
             if isinstance(value, dict):
+            # Typed asset reference format:
+            #   some_key:
+            #     type: asset
+            #     path: bg-default.jpg
+            if value.get("type") == "asset" and isinstance(value.get("path"), str):
+              raw_path = value["path"]
+              if raw_path.startswith("/"):
+                raise ValueError(f"Asset path must be relative, got absolute path: {raw_path}")
+
+              rel_path = raw_path[7:] if raw_path.startswith("assets/") else raw_path
+              rel_path = posixpath.normpath(rel_path)
+
+              if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
+                raise ValueError(f"Asset path escapes assets root: {raw_path}")
+
+              file_paths.append(rel_path)
+              return f"assets/{rel_path}"
+
                 normalized = {}
                 for key, subvalue in value.items():
                     normalized_value = normalize(subvalue)
-                    if key.endswith("_file") and isinstance(normalized_value, str):
-                        rel_path = normalized_value[7:] if normalized_value.startswith("assets/") else normalized_value
-                        file_paths.append(rel_path)
-                        normalized[key] = rel_path
-                    else:
-                        normalized[key] = normalized_value
+              normalized[key] = normalized_value
                 return normalized
 
             if isinstance(value, list):
@@ -62,7 +77,11 @@
 
             return value
 
-        normalized_overlay = normalize(data)
+        try:
+          normalized_overlay = normalize(data)
+        except ValueError as exc:
+          print(str(exc), file=sys.stderr)
+          raise SystemExit(1)
 
         print(
             json.dumps(
@@ -107,7 +126,7 @@
 
     - name: Copy files referenced by _file variables from assets
       copy:
-        src: "{{ playbook_dir }}/../assets/{{ item }}"
+        src: "{{ playbook_dir }}/../../config/assets/{{ item }}"
         dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/assets/{{ item }}"
       loop: "{{ overlay_file_paths | default([]) }}"
 

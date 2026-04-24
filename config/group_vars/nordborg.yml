@@ -1,5 +1,7 @@
 desktop: 
-  background_image_file: assets/bg-blue.jpg
+  background_image_file:
+    type: asset
+    path: bg-blue.jpg
 
 printer:
   default_printer: ricoh_c3010
@@ -9,7 +11,9 @@ printer:
       display_name: P11567 - Ricoh C3010
       protocol: socket
       ip: 10.1.1.30
-      ppd_file: assets/Ricoh-IM_C3010-PDF-Ricoh.ppd
+      ppd_file:
+        type: asset
+        path: Ricoh-IM_C3010-PDF-Ricoh.ppd
       settings:
         page_size: A4
         color_mode: rgb

@@ -5,7 +5,7 @@
   pre_tasks:
     - name: Load build target definitions
       include_vars:
-        file: "../inventory/build_targets.yml"
+        file: "../../config/inventory/build_targets.yml"
         name: build_target_data
 
     - name: Initialize detected target list

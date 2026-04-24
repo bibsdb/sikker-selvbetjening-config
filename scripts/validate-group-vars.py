@@ -69,8 +69,8 @@ def main() -> int:
     parser.add_argument(
         "paths",
         nargs="*",
-        default=["group_vars/*.yml"],
-        help="Files or glob patterns to validate (default: group_vars/*.yml)",
+        default=["config/group_vars/*.yml"],
+        help="Files or glob patterns to validate (default: config/group_vars/*.yml)",
     )
     args = parser.parse_args()
 

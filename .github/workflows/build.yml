@@ -74,8 +74,8 @@ jobs:
             seen_image_names.add(image_name)
 
             for group_name in groups:
-              if not Path(f"group_vars/{group_name}.yml").exists():
-                raise SystemExit(f"Missing group_vars/{group_name}.yml for target '{target_name}'")
+if not Path(f"config/group_vars/{group_name}.yml").exists():
+              raise SystemExit(f"Missing config/group_vars/{group_name}.yml for target '{target_name}'")
 
             entries.append(
               {

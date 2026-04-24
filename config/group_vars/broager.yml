@@ -1,0 +1,6 @@
+desktop: 
+  background_image_file:
+    type: asset
+    path: bg-green.jpg
+
+
