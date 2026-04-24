@@ -1,7 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-BASE_IMAGE="${BASE_IMAGE:-ghcr.io/bibsdb/sikker-selvbetjening}"
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+IMAGE_CONFIG_FILE="${IMAGE_CONFIG_FILE:-$REPO_ROOT/.env}"
+
+if [[ -f "$IMAGE_CONFIG_FILE" ]]; then
+  # shellcheck disable=SC1090
+  source "$IMAGE_CONFIG_FILE"
+fi
+
+BASE_IMAGE="${BASE_IMAGE:-ghcr.io/bibsdb/sikker-selvbetjening:latest}"
 SCHEMAS_PATH_IN_IMAGE="${SCHEMAS_PATH_IN_IMAGE:-/usr/share/sikker-selvbetjening/schemas}"
 GROUP_VARS_GLOB="${GROUP_VARS_GLOB:-config/group_vars/*.yml}"
 

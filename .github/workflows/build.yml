@@ -10,9 +10,6 @@ permissions:
   contents: read
   packages: write
 
-env:
-  BASE_IMAGE: ghcr.io/bibsdb/sikker-selvbetjening
-
 jobs:
   prepare:
     runs-on: ubuntu-latest

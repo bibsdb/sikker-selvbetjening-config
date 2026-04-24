@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+IMAGE_CONFIG_FILE="${IMAGE_CONFIG_FILE:-$REPO_ROOT/.env}"
+
+if [[ -f "$IMAGE_CONFIG_FILE" ]]; then
+  # shellcheck disable=SC1090
+  source "$IMAGE_CONFIG_FILE"
+fi
+
 TARGET_GROUPS_CSV="$1"
 FIRST_GROUP="${TARGET_GROUPS_CSV%%,*}"
 IMAGE_NAME="${2:-$FIRST_GROUP}"
-IMAGE_REPO="ghcr.io/bibsdb/sikker-selvbetjening-config"
-BASE_IMAGE="ghcr.io/bibsdb/sikker-selvbetjening"
+IMAGE_REPO="${IMAGE_REPO:-ghcr.io/bibsdb/sikker-selvbetjening-config}"
+BASE_IMAGE="${BASE_IMAGE:-ghcr.io/bibsdb/sikker-selvbetjening:latest}"
 DATE_TAG="$(date -u +%Y%m%d)"
 
 if [[ -n "${GITHUB_SHA:-}" ]]; then
