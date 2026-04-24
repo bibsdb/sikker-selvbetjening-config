@@ -37,6 +37,13 @@ fi
 rm -rf "build/${IMAGE_NAME}"
 ansible-playbook -i localhost, playbooks/render-host-overlays.yml -e "target_groups=${TARGET_GROUPS_CSV}" -e "build_name=${IMAGE_NAME}"
 
+podman run --rm \
+  -v "${REPO_ROOT}/build/${IMAGE_NAME}:/work:Z" \
+  "${BASE_IMAGE}" \
+  /usr/libexec/sikker-compile-desktop-background \
+  /work/usr/share/sikker-selvbetjening/config \
+  /work
+
 podman build \
   -t ${IMAGE_REPO}/${IMAGE_NAME}:latest \
   -f - . <<EOF

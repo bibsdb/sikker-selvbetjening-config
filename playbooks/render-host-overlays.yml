@@ -138,3 +138,13 @@
       vars:
         section_values: "{{ item.value }}"
       when: item.value is mapping
+
+    - name: Render desktop.conf for base image compiler compatibility
+      copy:
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/desktop.conf"
+        content: |
+          background_image_file={{ desktop_background_file }}
+      vars:
+        desktop_background_raw: "{{ rendered_overlay_sections.desktop.background_image_file | default('') }}"
+        desktop_background_file: "{{ desktop_background_raw | regex_replace('^assets/', '') if desktop_background_raw is string else '' }}"
+      when: desktop_background_file | length > 0
