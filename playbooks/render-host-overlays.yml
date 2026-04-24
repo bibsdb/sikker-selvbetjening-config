@@ -17,7 +17,7 @@
 
     - name: Load group vars for target groups in order
       include_vars:
-        file: "../../config/group_vars/{{ item }}.yml"
+        file: "../config/group_vars/{{ item }}.yml"
         name: overlay_group_vars
       loop: "{{ normalized_target_groups }}"
       register: loaded_group_vars
@@ -126,7 +126,7 @@
 
     - name: Copy files referenced by _file variables from assets
       copy:
-        src: "{{ playbook_dir }}/../../config/assets/{{ item }}"
+        src: "{{ playbook_dir }}/../config/assets/{{ item }}"
         dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/assets/{{ item }}"
       loop: "{{ overlay_file_paths | default([]) }}"
 
