@@ -41,11 +41,13 @@ flowchart TD
 
   C2 --> D1 --> D2 --> D3 --> D4 --> D5
 
-  subgraph Output Layout [build/<image>/usr/share/sikker-selvbetjening]
+  subgraph Output Layout [build/<image>/usr/share/sikker-selvbetjening/config]
     E1[printer.yml]
     E2[wifi.yml]
     E3[desktop.yml]
-    E4[referenced files from assets]
+    subgraph Assets [assets/]
+      E4[referenced files from source assets]
+    end
   end
 
   D5 --> E1

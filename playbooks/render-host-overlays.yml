@@ -92,13 +92,13 @@
   tasks:
     - name: Create build usr tree
       file:
-        path: "{{ build_root }}/usr/share/sikker-selvbetjening"
+        path: "{{ build_root }}/usr/share/sikker-selvbetjening/config"
         state: directory
         recurse: true
 
     - name: Create directories for file variables
       file:
-        path: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item | dirname }}"
+        path: "{{ build_root }}/usr/share/sikker-selvbetjening/config/assets/{{ item | dirname }}"
         state: directory
         recurse: true
       loop: "{{ overlay_file_paths | default([]) }}"
@@ -108,13 +108,13 @@
     - name: Copy files referenced by _file variables from assets
       copy:
         src: "{{ playbook_dir }}/../assets/{{ item }}"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item }}"
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/assets/{{ item }}"
       loop: "{{ overlay_file_paths | default([]) }}"
 
     - name: Render section config files as YAML
       template:
         src: "{{ playbook_dir }}/../templates/section.yml.j2"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/{{ item.key }}.yml"
+        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/{{ item.key }}.yml"
       loop: "{{ rendered_overlay_sections | dict2items }}"
       vars:
         section_values: "{{ item.value }}"
