@@ -44,10 +44,39 @@ podman rm "$container_id" >/dev/null
 container_id=""
 
 schema_file="$tmp_dir/schemas/group-vars.schema.json"
+
 if [[ ! -f "$schema_file" ]]; then
-  echo "Expected schema not found in base image: $SCHEMAS_PATH_IN_IMAGE/group-vars.schema.json" >&2
+  cat >&2 <<EOF
+Expected schema file not found in extracted image content.
+
+Expected path in image:
+- $SCHEMAS_PATH_IN_IMAGE/group-vars.schema.json
+EOF
   exit 1
 fi
+
+# Some schema bundles use relative $id values (for example "./group-vars.schema.json"),
+# which can cause check-jsonschema to resolve sibling refs against the working directory.
+# Removing relative $id values keeps $ref resolution anchored to the schema file location.
+python3 - <<'PY' "$tmp_dir/schemas"
+import json
+import pathlib
+import sys
+
+root = pathlib.Path(sys.argv[1])
+
+for path in root.rglob("*.json"):
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except Exception:
+        continue
+
+    if isinstance(data, dict):
+        schema_id = data.get("$id")
+        if isinstance(schema_id, str) and schema_id.startswith("./"):
+            del data["$id"]
+            path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+PY
 
 shopt -s nullglob
 group_var_files=( $GROUP_VARS_GLOB )
