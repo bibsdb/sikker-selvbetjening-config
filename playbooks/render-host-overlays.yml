@@ -48,28 +48,28 @@
 
         def normalize(value):
             if isinstance(value, dict):
-            # Typed asset reference format:
-            #   some_key:
-            #     type: asset
-            #     path: bg-default.jpg
-            if value.get("type") == "asset" and isinstance(value.get("path"), str):
-              raw_path = value["path"]
-              if raw_path.startswith("/"):
-                raise ValueError(f"Asset path must be relative, got absolute path: {raw_path}")
+                # Typed asset reference format:
+                #   some_key:
+                #     type: asset
+                #     path: bg-default.jpg
+                if value.get("type") == "asset" and isinstance(value.get("path"), str):
+                    raw_path = value["path"]
+                    if raw_path.startswith("/"):
+                        raise ValueError(f"Asset path must be relative, got absolute path: {raw_path}")
 
-              rel_path = raw_path[7:] if raw_path.startswith("assets/") else raw_path
-              rel_path = posixpath.normpath(rel_path)
+                    rel_path = raw_path[7:] if raw_path.startswith("assets/") else raw_path
+                    rel_path = posixpath.normpath(rel_path)
 
-              if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
-                raise ValueError(f"Asset path escapes assets root: {raw_path}")
+                    if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
+                        raise ValueError(f"Asset path escapes assets root: {raw_path}")
 
-              file_paths.append(rel_path)
-              return f"assets/{rel_path}"
+                    file_paths.append(rel_path)
+                    return f"assets/{rel_path}"
 
                 normalized = {}
                 for key, subvalue in value.items():
                     normalized_value = normalize(subvalue)
-              normalized[key] = normalized_value
+                    normalized[key] = normalized_value
                 return normalized
 
             if isinstance(value, list):
@@ -78,10 +78,10 @@
             return value
 
         try:
-          normalized_overlay = normalize(data)
+            normalized_overlay = normalize(data)
         except ValueError as exc:
-          print(str(exc), file=sys.stderr)
-          raise SystemExit(1)
+            print(str(exc), file=sys.stderr)
+            raise SystemExit(1)
 
         print(
             json.dumps(
