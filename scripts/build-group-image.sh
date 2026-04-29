@@ -77,6 +77,7 @@ podman build \
 FROM ${BASE_IMAGE}
 COPY build/${IMAGE_NAME}/usr/ /usr/
 COPY build/${IMAGE_NAME}/etc/ /etc/
+RUN if command -v dconf >/dev/null 2>&1; then dconf update; else echo "dconf not found; skipping dconf update"; fi
 EOF
 
 for tag in "${TAGS[@]}"; do
