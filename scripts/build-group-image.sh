@@ -40,6 +40,13 @@ ansible-playbook -i localhost, playbooks/render-host-overlays.yml -e "target_gro
 NORMALIZED_OVERLAY_PAYLOAD="${REPO_ROOT}/build/${IMAGE_NAME}/overlay.normalized.json"
 
 if [[ -f "${NORMALIZED_OVERLAY_PAYLOAD}" ]]; then
+  echo "Normalized overlay payload (${NORMALIZED_OVERLAY_PAYLOAD}):"
+  if command -v jq >/dev/null 2>&1; then
+    jq . "${NORMALIZED_OVERLAY_PAYLOAD}"
+  else
+    cat "${NORMALIZED_OVERLAY_PAYLOAD}"
+  fi
+
   podman run --rm \
     -v "${REPO_ROOT}/config/assets:/assets:Z,ro" \
     -v "${REPO_ROOT}/build/${IMAGE_NAME}:/work:Z" \
@@ -48,6 +55,18 @@ if [[ -f "${NORMALIZED_OVERLAY_PAYLOAD}" ]]; then
     /work/overlay.normalized.json \
     /assets \
     /work
+
+  echo "Post-helper debug: listing generated desktop artifacts"
+  ls -la "${REPO_ROOT}/build/${IMAGE_NAME}/usr/share/backgrounds/sikker-selvbetjening" || true
+  ls -la "${REPO_ROOT}/build/${IMAGE_NAME}/etc/dconf/db/local.d" || true
+
+  DCONF_DEFAULTS_FILE="${REPO_ROOT}/build/${IMAGE_NAME}/etc/dconf/db/local.d/03-desktop-background"
+  if [[ -f "${DCONF_DEFAULTS_FILE}" ]]; then
+    echo "Post-helper debug: found ${DCONF_DEFAULTS_FILE}"
+    cat "${DCONF_DEFAULTS_FILE}"
+  else
+    echo "Post-helper debug: missing ${DCONF_DEFAULTS_FILE}"
+  fi
 fi
 
 podman build \
