@@ -37,20 +37,17 @@ fi
 rm -rf "build/${IMAGE_NAME}"
 ansible-playbook -i localhost, playbooks/render-host-overlays.yml -e "target_groups=${TARGET_GROUPS_CSV}" -e "build_name=${IMAGE_NAME}"
 
-DESKTOP_BACKGROUND_MANIFEST="${REPO_ROOT}/build/${IMAGE_NAME}/desktop-background-asset.txt"
+NORMALIZED_OVERLAY_PAYLOAD="${REPO_ROOT}/build/${IMAGE_NAME}/overlay.normalized.json"
 
-if [[ -f "${DESKTOP_BACKGROUND_MANIFEST}" ]]; then
-  DESKTOP_BACKGROUND_ASSET_REL="$(head -n1 "${DESKTOP_BACKGROUND_MANIFEST}" | tr -d '\r')"
-
-  if [[ -n "${DESKTOP_BACKGROUND_ASSET_REL}" ]]; then
-    podman run --rm \
-      -v "${REPO_ROOT}/config/assets:/assets:Z,ro" \
-      -v "${REPO_ROOT}/build/${IMAGE_NAME}:/work:Z" \
-      "${BASE_IMAGE}" \
-      /usr/libexec/sikker-compile-desktop-background \
-      "/assets/${DESKTOP_BACKGROUND_ASSET_REL}" \
-      /work
-  fi
+if [[ -f "${NORMALIZED_OVERLAY_PAYLOAD}" ]]; then
+  podman run --rm \
+    -v "${REPO_ROOT}/config/assets:/assets:Z,ro" \
+    -v "${REPO_ROOT}/build/${IMAGE_NAME}:/work:Z" \
+    "${BASE_IMAGE}" \
+    /usr/libexec/sikker-apply-overlay \
+    /work/overlay.normalized.json \
+    /assets \
+    /work
 fi
 
 podman build \

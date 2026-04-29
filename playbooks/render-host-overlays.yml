@@ -56,13 +56,13 @@
             if isinstance(value, list):
                 return [normalize(item) for item in value]
 
-        if isinstance(value, str) and value.startswith("assets/"):
-          rel_path = posixpath.normpath(value[7:])
+          if isinstance(value, str) and value.startswith("assets/"):
+            rel_path = posixpath.normpath(value[7:])
 
-          if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
-            raise ValueError(f"Asset path escapes assets root: {value}")
+            if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
+              raise ValueError(f"Asset path escapes assets root: {value}")
 
-          return f"assets/{rel_path}"
+            return f"assets/{rel_path}"
 
             return value
 
@@ -75,7 +75,7 @@
         print(
             json.dumps(
                 {
-              "rendered_overlay_sections": normalized_overlay,
+                    "rendered_overlay_sections": normalized_overlay,
                 }
             )
         )
@@ -102,11 +102,7 @@
         state: directory
         recurse: true
 
-    - name: Emit desktop background asset manifest for base image helper
+    - name: Emit normalized overlay payload for base image helpers
       copy:
-        dest: "{{ build_root }}/desktop-background-asset.txt"
-        content: "{{ desktop_background_asset }}\n"
-      vars:
-        desktop_background_raw: "{{ rendered_overlay_sections.desktop.background_image_file | default('') }}"
-        desktop_background_asset: "{{ desktop_background_raw | regex_replace('^assets/', '') if desktop_background_raw is string else '' }}"
-      when: desktop_background_asset | length > 0
+        dest: "{{ build_root }}/overlay.normalized.json"
+        content: "{{ rendered_overlay_sections | to_nice_json }}\n"
