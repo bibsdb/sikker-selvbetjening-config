@@ -37,6 +37,8 @@ fi
 rm -rf "build/${IMAGE_NAME}"
 ansible-playbook -i localhost, playbooks/render-host-overlays.yml -e "target_groups=${TARGET_GROUPS_CSV}" -e "build_name=${IMAGE_NAME}"
 
+mkdir -p "build/${IMAGE_NAME}/usr" "build/${IMAGE_NAME}/etc"
+
 NORMALIZED_OVERLAY_PAYLOAD="${REPO_ROOT}/build/${IMAGE_NAME}/overlay.normalized.json"
 
 if [[ -f "${NORMALIZED_OVERLAY_PAYLOAD}" ]]; then
@@ -74,6 +76,7 @@ podman build \
   -f - . <<EOF
 FROM ${BASE_IMAGE}
 COPY build/${IMAGE_NAME}/usr/ /usr/
+COPY build/${IMAGE_NAME}/etc/ /etc/
 EOF
 
 for tag in "${TAGS[@]}"; do
