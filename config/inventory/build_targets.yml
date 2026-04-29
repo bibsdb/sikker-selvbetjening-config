@@ -5,10 +5,3 @@ targets:
       - borgerpc-basis
       - nordborg
     image_name: nordborg
-    
-  - name: Broager
-    description: Build image for Broager
-    groups:
-      - borgerpc-basis
-      - broager
-    image_name: broager
