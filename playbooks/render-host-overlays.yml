@@ -56,13 +56,13 @@
             if isinstance(value, list):
                 return [normalize(item) for item in value]
 
-          if isinstance(value, str) and value.startswith("assets/"):
-            rel_path = posixpath.normpath(value[7:])
+            if isinstance(value, str) and value.startswith("assets/"):
+                rel_path = posixpath.normpath(value[7:])
 
-            if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
-              raise ValueError(f"Asset path escapes assets root: {value}")
+                if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
+                    raise ValueError(f"Asset path escapes assets root: {value}")
 
-            return f"assets/{rel_path}"
+                return f"assets/{rel_path}"
 
             return value
 
