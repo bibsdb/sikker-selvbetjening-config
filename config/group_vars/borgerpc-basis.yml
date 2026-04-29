@@ -1,7 +1,5 @@
 desktop: 
-  background_image_file:
-    type: asset
-    path: bg-default.jpg
+  background_image_file: assets/bg-default.jpg
   
   shortcuts_in_menu:
     - firefox

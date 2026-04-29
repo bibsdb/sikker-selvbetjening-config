@@ -35,7 +35,7 @@
       set_fact:
         build_root: "{{ playbook_dir }}/../build/{{ build_name }}"
 
-    - name: Normalize overlay data and collect typed asset references
+    - name: Normalize overlay data and validate assets path values
       shell: |
         python3 - <<'PY'
         import json
@@ -44,28 +44,9 @@
         import sys
 
         data = json.loads(os.environ["OVERLAY_JSON"])
-        file_paths = []
 
         def normalize(value):
             if isinstance(value, dict):
-                # Typed asset reference format:
-                #   some_key:
-                #     type: asset
-                #     path: bg-default.jpg
-                if value.get("type") == "asset" and isinstance(value.get("path"), str):
-                    raw_path = value["path"]
-                    if raw_path.startswith("/"):
-                        raise ValueError(f"Asset path must be relative, got absolute path: {raw_path}")
-
-                    rel_path = raw_path[7:] if raw_path.startswith("assets/") else raw_path
-                    rel_path = posixpath.normpath(rel_path)
-
-                    if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
-                        raise ValueError(f"Asset path escapes assets root: {raw_path}")
-
-                    file_paths.append(rel_path)
-                    return f"assets/{rel_path}"
-
                 normalized = {}
                 for key, subvalue in value.items():
                     normalized_value = normalize(subvalue)
@@ -74,6 +55,14 @@
 
             if isinstance(value, list):
                 return [normalize(item) for item in value]
+
+        if isinstance(value, str) and value.startswith("assets/"):
+          rel_path = posixpath.normpath(value[7:])
+
+          if rel_path in (".", "") or rel_path.startswith("../") or "/../" in rel_path:
+            raise ValueError(f"Asset path escapes assets root: {value}")
+
+          return f"assets/{rel_path}"
 
             return value
 
@@ -86,8 +75,7 @@
         print(
             json.dumps(
                 {
-                    "rendered_overlay_sections": normalized_overlay,
-                    "overlay_file_paths": sorted(set(file_paths)),
+              "rendered_overlay_sections": normalized_overlay,
                 }
             )
         )
@@ -106,45 +94,19 @@
     - name: Set rendered overlay sections
       set_fact:
         rendered_overlay_sections: "{{ overlay_processing_data.rendered_overlay_sections }}"
-        overlay_file_paths: "{{ overlay_processing_data.overlay_file_paths }}"
 
   tasks:
-    - name: Create build usr tree
+    - name: Create build root
       file:
-        path: "{{ build_root }}/usr/share/sikker-selvbetjening/config"
+        path: "{{ build_root }}"
         state: directory
         recurse: true
 
-    - name: Create directories for file variables
-      file:
-        path: "{{ build_root }}/usr/share/sikker-selvbetjening/config/assets/{{ item | dirname }}"
-        state: directory
-        recurse: true
-      loop: "{{ overlay_file_paths | default([]) }}"
-      when:
-        - item | dirname != '.'
-
-    - name: Copy files referenced by _file variables from assets
+    - name: Emit desktop background asset manifest for base image helper
       copy:
-        src: "{{ playbook_dir }}/../config/assets/{{ item }}"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/assets/{{ item }}"
-      loop: "{{ overlay_file_paths | default([]) }}"
-
-    - name: Render section config files as YAML
-      template:
-        src: "{{ playbook_dir }}/../templates/section.yml.j2"
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/{{ item.key }}.yml"
-      loop: "{{ rendered_overlay_sections | dict2items }}"
-      vars:
-        section_values: "{{ item.value }}"
-      when: item.value is mapping
-
-    - name: Render desktop.conf for base image compiler compatibility
-      copy:
-        dest: "{{ build_root }}/usr/share/sikker-selvbetjening/config/desktop.conf"
-        content: |
-          background_image_file={{ desktop_background_file }}
+        dest: "{{ build_root }}/desktop-background-asset.txt"
+        content: "{{ desktop_background_asset }}\n"
       vars:
         desktop_background_raw: "{{ rendered_overlay_sections.desktop.background_image_file | default('') }}"
-        desktop_background_file: "{{ desktop_background_raw | regex_replace('^assets/', '') if desktop_background_raw is string else '' }}"
-      when: desktop_background_file | length > 0
+        desktop_background_asset: "{{ desktop_background_raw | regex_replace('^assets/', '') if desktop_background_raw is string else '' }}"
+      when: desktop_background_asset | length > 0
